@@ -52,5 +52,6 @@ def getPlaylistLinks(urlPlaylist):
     for link in soup.find_all("a", {"dir": "ltr"}):
         href = link.get('href')
         if href.startswith('/watch?'):
+            #replace with return
             print(link.string.strip())
             print(domain + href + '\n')
