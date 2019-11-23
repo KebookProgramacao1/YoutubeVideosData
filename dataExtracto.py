@@ -1,4 +1,5 @@
 from urllib.request import Request, urlopen
+from datetime import timedelta
 from bs4 import BeautifulSoup
 import requests
 import pafy
@@ -13,10 +14,10 @@ def getVideoTitle(idVideo):
     soup = str(soup)
 
     clean = re.compile("<.*?>")
-    saida = re.sub(clean, '', soup)
+    title = re.sub(clean, '', soup)
 
-    saida = saida.strip("[").strip("]").strip("*\n").strip(" ")
-    return saida[:-1]
+    title = title.strip("[").strip("]").strip("*\n").strip(" ")
+    return title[:-1]
 
 
 def getVideoDescription(idVideo):
@@ -27,31 +28,38 @@ def getVideoDescription(idVideo):
     soup = BeautifulSoup(webpage, 'html.parser')
 
     for p in soup.findAll('p', attrs={'id': 'eow-description'}):
-        saida = p.text
-        return saida
+        desc = p.text
+        return desc
 
 
+# return in array format, [0]=hour, [1]=minutes, [2]=seconds
 def getVideoDuration(idVideo):
     url = 'https://www.youtube.com/watch?v='+idVideo
 
     video = pafy.new(url)
-    video = video.duration
-    video = video.split(':')
+    time = video.duration
 
-    if int(video[0]) <= 0:
-        video = video[1]+':'+video[2]
-    else:
-        video = video[0]+':'+video[1]+':'+video[2]
-    return video
+    return time.split(':')
 
-     
+
+def getPlaylistDuration(arrayLinks):
+    plDuration = timedelta(hours=0, minutes=0, seconds=0)
+    
+    for link in arrayLinks:
+        videoDuration = getVideoDuration(link)
+        plDuration += timedelta(hours=int(videoDuration[0]), minutes=int(videoDuration[1]), seconds=int(videoDuration[2]))
+        print(plDuration)
+    return plDuration
+
+
+# return array links
 def getPlaylistLinks(urlPlaylist):
+    videoLinks = []
     sourceCode = requests.get(urlPlaylist).text
     soup = BeautifulSoup(sourceCode, 'html.parser')
     domain = 'https://www.youtube.com'
     for link in soup.find_all("a", {"dir": "ltr"}):
         href = link.get('href')
         if href.startswith('/watch?'):
-            #replace with return
-            print(link.string.strip())
-            print(domain + href + '\n')
+            videoLinks.append(href[9:20])
+    return videoLinks
