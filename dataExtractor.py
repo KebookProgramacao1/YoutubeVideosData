@@ -42,7 +42,8 @@ def getVideoDuration(idVideo):
     return time.split(':')
 
 
-def getPlaylistDuration(arrayLinks):
+def getPlaylistDuration(urlPlaylist):
+    arrayLinks = getPlaylistLinks(urlPlaylist)
     plDuration = timedelta(hours=0, minutes=0, seconds=0)
     
     for link in arrayLinks:
